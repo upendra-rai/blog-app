@@ -16,8 +16,12 @@ import { useState } from "react";
 import Base from "../components/Base";
 import { toast } from "react-toastify";
 import { loginUser } from "../services/user-service";
+import { doLogin } from "../auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+  const navigate= useNavigate()
   const [loginDetails, SetLoginDetails] = useState({
     userName: "",
     password: "",
@@ -34,12 +38,17 @@ const Login = () => {
   const handleFormSubmit = (event) => {
     event.preventDefault();
     if(loginDetails.userName.trim()===''&&loginDetails.password.trim()===''){
-        toast.error("UserName And Password is Required!")
+        toast.error("userName And Password is Required!")
         return;
     }
     //Submit Data to Backend Server
-    loginUser(loginDetails).then((jwtTokenData)=>{
-        console.log(jwtTokenData)
+    loginUser(loginDetails).then((data)=>{
+        console.log(data)
+        //Save the data in localStorage
+        doLogin(data,()=>{
+          console.log("logIn Details to save LocalStorage")
+          navigate("/user/dashboard")
+        })
     }).catch(error=>{
         console.log(error)
         if(error.response.status==400||error.response.status==404 ){
@@ -72,8 +81,8 @@ const Login = () => {
                       <Input
                         type="text"
                         id="email"
-                        value={loginDetails.username}
-                        onChange={(e) => handleChange(e, "username")}
+                        value={loginDetails.userName}
+                        onChange={(e) => handleChange(e, "userName")}
                       />
                     </FormGroup>
 
